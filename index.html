@@ -78,7 +78,8 @@
         .btn-add { background-color: var(--primary); color: white; }
         .btn-pdf { background-color: #3dd68c; color: white; flex: 1; }
         .btn-reset { background-color: #ffeaea; color: var(--danger); flex: 1; }
-        .btn-del { color: var(--danger); cursor: pointer; background: transparent; border: none; font-size: 16px; font-weight: bold;}
+        .btn-del { color: var(--danger); cursor: pointer; background: transparent; border: none; font-size: 13px; font-weight: bold; padding: 0; line-height: 1; width: 20px; height: 20px; }
+        .col-action { padding: 2px !important; width: 28px; }
         .actions-bottom { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
 
         /* SPAN KHUSUS PDF */
@@ -136,6 +137,31 @@
             .print-header h2 { font-size: 12px; }
             .print-header p { font-size: 7px; }
         }
+
+        /* MODE POTRET HP: sembunyikan kolom "Jumlah Asli" & "Kondisi Bahan Makanan" agar tabel lebih ringkas */
+        @media (max-width: 768px) and (orientation: portrait) {
+            table { min-width: auto; }
+            table thead tr:first-child th:nth-child(5),   /* Jumlah Asli */
+            table thead tr:first-child th:nth-child(7),   /* Kondisi Bahan Makanan */
+            table thead tr:last-child th:nth-child(3),    /* Baik */
+            table thead tr:last-child th:nth-child(4),    /* Rusak */
+            table tbody td:nth-child(5),                  /* Jumlah Asli */
+            table tbody td:nth-child(8),                  /* Baik */
+            table tbody td:nth-child(9) {                 /* Rusak */
+                display: none;
+            }
+        }
+
+        /* Tetap tampilkan kolom-kolom itu saat ekspor PDF, walau layar sedang potret */
+        .pdf-mode table thead tr:first-child th:nth-child(5),
+        .pdf-mode table thead tr:first-child th:nth-child(7),
+        .pdf-mode table thead tr:last-child th:nth-child(3),
+        .pdf-mode table thead tr:last-child th:nth-child(4),
+        .pdf-mode table tbody td:nth-child(5),
+        .pdf-mode table tbody td:nth-child(8),
+        .pdf-mode table tbody td:nth-child(9) {
+            display: table-cell !important;
+        }
     </style>
 </head>
 <body>
@@ -169,7 +195,7 @@
                     <th rowspan="2" style="width: 13%;">Jumlah<br>Asli</th>
                     <th colspan="2" style="width: 18%;">Jumlah</th>
                     <th colspan="2" style="width: 18%;">Kondisi Bahan Makanan</th>
-                    <th rowspan="2" class="col-action" style="width: 50px;">Aksi</th>
+                    <th rowspan="2" class="col-action" style="width: 28px;">Aksi</th>
                 </tr>
                 <tr>
                     <th style="width: 9%;">Sesuai</th>
@@ -234,8 +260,13 @@
 
         if (addedCount > 0) {
             document.getElementById('bulkInput').value = ''; 
+            sortDataByName();
             renderTable();
         }
+    }
+
+    function sortDataByName() {
+        shoppingData.sort((a, b) => a.name.localeCompare(b.name, 'id', { sensitivity: 'base', numeric: true }));
     }
 
     function toggleTick(index, type) {
@@ -294,7 +325,7 @@
                 <td>${index + 1}</td>
                 <td style="text-align: left;">
                     <input type="text" class="edit-input no-pdf" style="font-weight: 600;" 
-                           value="${item.name}" oninput="updateData(${index}, 'name', this)">
+                           value="${item.name}" oninput="updateData(${index}, 'name', this)" onblur="sortDataByName(); renderTable();">
                     <span class="only-pdf" style="text-align: left;">${item.name}</span>
                 </td>
                 <td>
